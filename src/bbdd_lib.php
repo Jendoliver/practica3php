@@ -32,14 +32,7 @@ function selectAllJugadores()
     {
         if(mysqli_num_rows($res)) // si hay jugadores
         {
-            echo "<table style='2px solid;'>"; // creación de la tabla y su header
-            echo "<tr><th>Nombre</th><th>Fecha de nacimiento</th><th>Número de canastas</th><th>Número de asistencias</th><th>Número de rebotes</th><th>Posición</th><th>Equipo</th></tr>";
-            while ($row = mysqli_fetch_array($res)) // mientras haya filas
-            {
-                extract($row);
-                echo "<tr><td>$name</td><td>$birth</td><td>$nbaskets</td><td>$nassists</td><td>$nrebounds</td><td>$position</td><td>$team</td></tr>";
-            }
-            echo "</table>";
+            createTable($con, $res);
             desconectar($con);
             printHomeButton();
         }
@@ -65,14 +58,7 @@ function selectAllEquipos()
     {
         if(mysqli_num_rows($res)) // si hay equipos
         {
-            echo "<table style='2px solid;'>"; // creación de la tabla y su header
-            echo "<tr><th>Nombre</th><th>Ciudad del equipo</th><th>Fecha de creación del equipo</th></tr>";
-            while ($row = mysqli_fetch_array($res)) // mientras haya filas
-            {
-                extract($row);
-                echo "<tr><td>$name</td><td>$city</td><td>$creation</td></tr>";
-            }
-            echo "</table>";
+            createTable($con, $res);
             desconectar($con);
             printHomeButton();
         }
@@ -93,24 +79,87 @@ function selectAllEquipos()
 
 function selectJugadoresEquipo($equipo)
 {
-    
+    $con = conectar("basket");
+    if($res = mysqli_query($con, "SELECT * FROM player WHERE team = '$equipo';"))
+    {
+        if(mysqli_num_rows($res)) // si hay jugadores en ese equipo
+        {
+            createTable($con, $res);
+            desconectar($con);
+            printHomeButton();
+        }
+        else
+        {
+            desconectar($con);
+            errorTeamWithoutPlayers();
+            printHomeButton();
+        }
+    }
+    else
+    {
+        desconectar($con);
+        errorConsulta();
+        printHomeButton();
+    }
 }
 
 function selectJugadoresCanastas($canastas)
 {
-    
+    $con = conectar("basket");
+    if($res = mysqli_query($con, "SELECT * FROM player WHERE nbaskets >= $canastas;"))
+    {
+        if(mysqli_num_rows($res)) // si hay jugadores que cumplan ese criterio
+        {
+            createTable($con, $res);
+            desconectar($con);
+            printHomeButton();
+        }
+        else
+        {
+            desconectar($con);
+            errorNoResults();
+            printHomeButton();
+        }
+    }
+    else
+    {
+        desconectar($con);
+        errorConsulta();
+        printHomeButton();
+    }
 }
 
 function selectEquiposCiudad($ciudad)
 {
-    
+    $con = conectar("basket");
+    if($res = mysqli_query($con, "SELECT * FROM team WHERE city = '$ciudad';"))
+    {
+        if(mysqli_num_rows($res)) // si hay equipos en esa ciudad
+        {
+            createTable($con, $res);
+            desconectar($con);
+            printHomeButton();
+        }
+        else
+        {
+            desconectar($con);
+            errorNoResults();
+            printHomeButton();
+        }
+    }
+    else
+    {
+        desconectar($con);
+        errorConsulta();
+        printHomeButton();
+    }
 }
 //INSERTS
 function insertarEquipo($nombre, $ciudad, $fecha)
 {
-    $con = conectar("basket");
     if(!equipoExists($nombre)) // si el equipo no existe
     {
+        $con = conectar("basket");
         $insert = "INSERT INTO team VALUES('$nombre', '$ciudad', '$fecha');";
         if(mysqli_query($con, $insert))
         {
@@ -127,7 +176,6 @@ function insertarEquipo($nombre, $ciudad, $fecha)
     }
     else
     {
-        desconectar($con);
         errorEquipoYaExiste();
         printHomeButton();
     }
@@ -154,21 +202,70 @@ function insertarJugador($nombre, $fechanac, $ncanastas, $nasis, $nrebotes, $pos
     }
     else
     {
-        desconectar($con);
         errorEquipoNoExiste();
         printHomeButton();
     }
 }
 
 //UPDATES
-function actualizarPuntosJugador($canastas, $asis, $rebotes)
+function actualizarPuntosJugador($nombre, $canastas, $asis, $rebotes)
 {
-    
+    if(jugadorExists($nombre))
+    {
+        $con = conectar("basket");
+        $update = "UPDATE player SET nbaskets = $canastas, nassists = $asis, nrebounds = $rebotes WHERE name = '$nombre';";
+        if(mysqli_query($con, $update))
+        {
+            desconectar($con);
+            echo "<p>Puntos del jugador actualizados con éxito";
+            printHomeButton();
+        }
+        else
+        {
+            desconectar($con);
+            errorConsulta();
+            printHomeButton();
+        }
+    }
+    else
+    {
+        errorJugadorNoExiste();
+        printHomeButton();
+    }
 }
 
-function actualizarEquipoJugador($equipo)
+function actualizarEquipoJugador($nombre, $equipo)
 {
-    
+    if(jugadorExists($nombre))
+    {
+        if(equipoExists($equipo))
+        {
+            $con = conectar("basket");
+            $update = "UPDATE player SET team = '$equipo';";
+            if(mysqli_query($con, $update))
+            {
+                desconectar($con);
+                echo "<p>Equipo del jugador actualizado con éxito";
+                printHomeButton();
+            }
+            else
+            {
+                desconectar($con);
+                errorConsulta();
+                printHomeButton();
+            }
+        }
+        else
+        {
+            errorEquipoNoExiste();
+            printHomeButton();
+        }
+    }
+    else
+    {
+        errorJugadorNoExiste();
+        printHomeButton();
+    }
 }
 
 //DELETES
@@ -240,4 +337,25 @@ function equipoExists($nombre)
         errorConsulta();
         printHomeButton();
     }
+}
+
+//CREACIÓN DE TABLAS
+function createTable($con, $res)
+{
+    $row = mysqli_fetch_assoc($res);
+    echo "<table border=2px><th>"; // principio de tabla
+    foreach($row as $key => $value) // header tabla
+    {
+        echo "<td>$key</td>";
+    }
+    echo "</th>";
+
+    do // llenar tabla con el contenido de la query
+    {
+        echo "<tr>"; // principio de fila
+        foreach($row as $key => $value) // llenamos una fila
+            echo "<td>$value</td>";
+        echo "</tr>"; // final de fila
+    } while ($row = mysqli_fetch_assoc($res)); // mientras queden registros en la query
+    echo "</table>"; // final de tabla
 }

@@ -25,7 +25,13 @@ function errorEquipoYaExiste()
 function errorEquipoNoExiste()
 {
     echo "<h1>EL EQUIPO ESPECIFICADO NO EXISTE, CREALO PRIMERO</h1>";
-    echo "<p><input type='submit' value='IR A CREACIÓN DE EQUIPOS' formaction='crearequipo.php'>";
+    echo "<p><input type='submit' value='IR A CREACION DE EQUIPOS' formaction='crearequipo.php'>";
+}
+
+function errorJugadorNoExiste()
+{
+    echo "<h1>EL JUGADOR ESPECIFICADO NO EXISTE, CREALO PRIMERO</h1>";
+    echo "<p><input type='submit' value='IR A CREACION DE JUGADORES' formaction='crearjugador.php'>";
 }
 
 function errorPlayerEmpty()
@@ -38,6 +44,16 @@ function errorTeamEmpty()
 {
     echo "<h1>La lista de equipos esta vacia, tendras que dar de alta alguno primero</h1>";
     echo "<p><input type='submit' value='IR A NUEVO EQUIPO' formaction='crearequipo.php'>";
+}
+
+function errorTeamWithoutPlayers()
+{
+    echo "<h1>El equipo especificado no tiene jugadores</h1>";
+}
+
+function errorNoResults()
+{
+    echo "<h1>No hay resultados</h1>";
 }
 
 //Paranoias
