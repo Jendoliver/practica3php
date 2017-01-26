@@ -21,7 +21,7 @@ function desconectar($con) // Otra que tal
 
 function printHomeButton()
 {
-    echo "<p><input type='submit' value='VOLVER AL MENÚ PRINCIPAL' formaction='index.php'>";
+    echo "<p><form action='index.php' method='POST'><input type='submit' value='VOLVER AL MENÚ PRINCIPAL'></form>";
 }
 
 //SELECTS
@@ -183,27 +183,34 @@ function insertarEquipo($nombre, $ciudad, $fecha)
 
 function insertarJugador($nombre, $fechanac, $ncanastas, $nasis, $nrebotes, $posicion, $equipo)
 {
-    if(equipoExists($equipo)) // antes de nada comprobamos que el equipo especificado realmente existe
-    {
-        $con = conectar("basket");
-        $insert = "INSERT INTO player VALUES('$nombre', '$fechanac', $ncanastas, $nasis, $nrebotes, '$posicion', '$equipo');";
-        if(mysqli_query($con, $insert))
+    if(!jugadorExists($nombre)) // antes de nada comprobamos que el jugador no exista ya
+    {   
+        if(equipoExists($equipo)) // después comprobamos que el equipo especificado realmente existe
         {
-            desconectar($con);
-            echo "<p>Jugador creado con éxito";
-            printHomeButton();
+            $con = conectar("basket");
+            $insert = "INSERT INTO player VALUES('$nombre', '$fechanac', $ncanastas, $nasis, $nrebotes, '$posicion', '$equipo');";
+            if(mysqli_query($con, $insert))
+            {
+                desconectar($con);
+                echo "<p>Jugador creado con éxito";
+                printHomeButton();
+            }
+            else
+            {
+                desconectar($con);
+                errorConsulta();
+                printHomeButton();
+            }
         }
         else
         {
-            desconectar($con);
-            errorConsulta();
+            errorEquipoNoExiste();
             printHomeButton();
         }
     }
     else
     {
-        errorEquipoNoExiste();
-        printHomeButton();
+        errorJugadorYaExiste();
     }
 }
 
@@ -343,19 +350,20 @@ function equipoExists($nombre)
 function createTable($con, $res)
 {
     $row = mysqli_fetch_assoc($res);
-    echo "<table border=2px><th>"; // principio de tabla
+    $table = "<table border=2px><thead>"; // principio de tabla
     foreach($row as $key => $value) // header tabla
     {
-        echo "<td>$key</td>";
+        $table .= "<th>$key</th>";
     }
-    echo "</th>";
+    $table .= "</thead><tbody>";
 
     do // llenar tabla con el contenido de la query
     {
-        echo "<tr>"; // principio de fila
+        $table .= "<tr>"; // principio de fila
         foreach($row as $key => $value) // llenamos una fila
-            echo "<td>$value</td>";
-        echo "</tr>"; // final de fila
+            $table .= "<td>$value</td>";
+        $table .= "</tr>"; // final de fila
     } while ($row = mysqli_fetch_assoc($res)); // mientras queden registros en la query
-    echo "</table>"; // final de tabla
+    $table .= "</tbody></table>"; // final de tabla
+    echo $table;
 }

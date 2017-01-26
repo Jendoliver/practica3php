@@ -18,32 +18,37 @@ function errorEquipoYaExiste()
     if(!empty($_POST))
     {
         freePost($_POST);
-        echo "<p><input type='submit' value='VOLVER A INTENTARLO' formaction='crearequipo.php'>";
+        echo "<form action='crearequipo.php' method='POST'><input type='submit' value='VOLVER A INTENTARLO'></form>";
     }
 }
 
 function errorEquipoNoExiste()
 {
     echo "<h1>EL EQUIPO ESPECIFICADO NO EXISTE, CREALO PRIMERO</h1>";
-    echo "<p><input type='submit' value='IR A CREACION DE EQUIPOS' formaction='crearequipo.php'>";
+    echo "<form action='crearequipo.php' method='POST'><input type='submit' value='IR A CREACION DE EQUIPOS'></form>";
 }
 
 function errorJugadorNoExiste()
 {
     echo "<h1>EL JUGADOR ESPECIFICADO NO EXISTE, CREALO PRIMERO</h1>";
-    echo "<p><input type='submit' value='IR A CREACION DE JUGADORES' formaction='crearjugador.php'>";
+    echo "<form action='crearjugador.php' method='POST'><input type='submit' value='IR A CREACION DE JUGADORES'></form>";
+}
+
+function errorJugadorYaExiste()
+{
+    echo "<h1>EL JUGADOR YA EXISTE</h1>";
 }
 
 function errorPlayerEmpty()
 {
     echo "<h1>La lista de jugadores esta vacia, tendras que dar de alta alguno primero</h1>";
-    echo "<p><input type='submit' value='IR A NUEVO JUGADOR' formaction='crearjugador.php'>";
+    echo "<form action='crearjugador.php' method='POST'><input type='submit' value='IR A NUEVO JUGADOR'></form>";
 }
 
 function errorTeamEmpty()
 {
     echo "<h1>La lista de equipos esta vacia, tendras que dar de alta alguno primero</h1>";
-    echo "<p><input type='submit' value='IR A NUEVO EQUIPO' formaction='crearequipo.php'>";
+    echo "<form action='crearequipo.php' method='POST'><input type='submit' value='IR A NUEVO EQUIPO'></form>";
 }
 
 function errorTeamWithoutPlayers()
